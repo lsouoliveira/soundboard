@@ -43,3 +43,6 @@ class SongModel(QAbstractListModel):
                 song.is_playing = False
 
         self.dataChanged.emit(self.index(0), self.index(len(self._songs) - 1))
+
+    def path(self, index: int):
+        self.data(self.index(index), Qt.DisplayRole + 3)

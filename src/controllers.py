@@ -8,21 +8,21 @@ class PlayerController(QObject):
     def __init__(self, songModel: SongModel):
         super().__init__()
 
-        self._song_model = songModel
+        self.model = songModel
+        self._media_player = self.create_player()
 
+    def create_player(self):
         audio_output = QAudioOutput()
-
         audio_output.setVolume(1)
 
-        self._media_player = QMediaPlayer()
-        self._media_player.setAudioOutput(audio_output)
+        player = QMediaPlayer()
+        player.setAudioOutput(audio_output)
+
+        return player
 
     @Slot(int)
     def play(self, index: int):
-        if self._song_model.rowCount() - 1 < index:
-            return
-
-        self._song_model.mark_as_playing(index)
+        self.model.mark_as_playing(index)
         self._play_song(index)
 
     def pause(self):
@@ -38,8 +38,6 @@ class PlayerController(QObject):
         print("Playing previous song")
 
     def _play_song(self, index: int):
-        song_path = self._song_model.data(
-            self._song_model.index(index), Qt.DisplayRole + 3
-        )
+        song_path = self.model.path(index)
 
         self._media_player.setSource(QUrl.fromLocalFile(song_path))
