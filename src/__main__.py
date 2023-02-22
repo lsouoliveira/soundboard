@@ -1,13 +1,17 @@
+# !/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import sys
 import os
 
-from PySide6.QtQml import QQmlApplicationEngine
+from PySide6.QtQml import QQmlApplicationEngine, qmlRegisterType
 from PySide6.QtWidgets import QApplication
+from PySide6.QtCore import QObject, Slot, QUrl, Signal, Property
+from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 
-from controllers import PlayerController
-from models import SongModel
+from player_view import PlayerView
+from models import PlaylistModel, ToastModel, PlayerModel
 from utils import load_fonts, APP_PATH
-from data import Song
 
 
 def main():
@@ -17,24 +21,19 @@ def main():
 
     engine = QQmlApplicationEngine()
 
-    # Creating a list of _songs
-    songs = [
-        Song("Song 1", "3:00", "path/to/song1.mp3"),
-        Song("Song 2", "3:00", "path/to/song2.mp3"),
-    ]
+    playlist_model = PlaylistModel()
+    toast_model = ToastModel()
+    player_model = PlayerModel()
 
-    # Creating a SongModel instance
-    song_model = SongModel(songs)
+    player_view = PlayerView(playlist_model, toast_model, player_model)
 
-    # Creating a PlayerController instance
-    player_controller = PlayerController(song_model)
+    qmlRegisterType(PlaylistModel, "PlaylistModel", 1, 0, "PlaylistModel")
 
     # Creating a context
     context = engine.rootContext()
 
     # Setting the context properties
-    context.setContextProperty("songModel", song_model)
-    context.setContextProperty("playerController", player_controller)
+    context.setContextProperty("PlayerView", player_view)
 
     # Loading the QML file
     engine.load(os.path.join(APP_PATH, "main.qml"))

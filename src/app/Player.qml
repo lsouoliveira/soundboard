@@ -17,7 +17,7 @@ Rectangle {
             Layout.rightMargin: 50
             Layout.topMargin: 50
             Layout.fillWidth: true
-            text: "Supir Angkot Goblog"
+            text: PlayerView.player_model.title 
             color: "#ffffff"
             font.family: "Source Sans Pro"
             font.weight: Font.DemiBold
@@ -68,7 +68,7 @@ Rectangle {
 
                 Text {
                     Layout.fillWidth: true
-                    text: "0:18"
+                    text: formatDuration(PlayerView.player_model.position)
                     color: "#ffffff"
                     opacity: 0.4
                     font.family: "Source Sans Pro"
@@ -77,7 +77,7 @@ Rectangle {
                 }
 
                 Text {
-                    text: "0:29"
+                    text: formatDuration(PlayerView.player_model.duration)
                     color: "#ffffff"
                     opacity: 0.4
                     font.family: "Source Sans Pro"

@@ -40,19 +40,13 @@ ListView {
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        playerController.play(index)
-                    }
-                    onEntered: {
-                        songName.color = "#71C6FF"
-                    }
-                    onExited: {
-                        songName.color = (model.is_playing ? "#71C6FF" : "white")
+                        PlayerView.play(index)
                     }
                 }
             }
 
             Text {
-                text: model.duration 
+                text: formatDuration(model.duration)
                 font.family: "Source Sans Pro"
                 font.pointSize: 14
                 opacity: 0.4
