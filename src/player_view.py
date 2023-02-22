@@ -92,7 +92,7 @@ class PlayerView(QObject):
         file_path = file_path.replace("\\", "/")
 
         mime = magic.from_file(file_path, mime=True)
-        file_extension = mimetypes.guess_extension(mime)
+        file_extension = mimetypes.guess_extension(mime) or os.path.splitext(file_path)[-1] 
 
         if not file_extension:
             return
