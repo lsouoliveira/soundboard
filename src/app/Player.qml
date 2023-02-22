@@ -108,6 +108,7 @@ Rectangle {
                     source: "images/play-arrow.png"
                     width: 28
                     height: 28
+                    visible: !PlayerView.player_model.is_playing
                     x: parent.x + parent.width / 2 - (width * (1 / 3))
                     y: parent.y + parent.height / 2 - (height / 2)
                 }
@@ -117,7 +118,7 @@ Rectangle {
                     source: "images/pause.png"
                     width: 28
                     height: 28
-                    visible: false
+                    visible: PlayerView.player_model.is_playing
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.horizontalCenter: parent.horizontalCenter
                 }
@@ -130,13 +131,18 @@ Rectangle {
                     width: parent.width
                     height: parent.height
                     hoverEnabled: true
+                    onClicked: {
+                        if(PlayerView.player_model.is_playing) {
+                            PlayerView.pause()
+                        } else {
+                            PlayerView.unpause()
+                        }
+                    }
                     onPressed: {
                         scale.xScale = 0.9
                         scale.yScale = 0.9
                         scale.origin.x = parent.width / 2 
                         scale.origin.y = parent.height / 2
-                        icon_default.visible = !icon_default.visible
-                        icon_pressed.visible = !icon_pressed.visible
                     }
                     onReleased: {
                         scale.xScale = 1

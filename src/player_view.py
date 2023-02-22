@@ -1,6 +1,7 @@
 import magic
 import mimetypes
-import eyed3
+from tinytag import TinyTag
+import os
 
 from PySide6.QtCore import QObject, Slot, QUrl, Signal, Property
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
@@ -33,6 +34,7 @@ class PlayerView(QObject):
 
         self._player.errorChanged.connect(self._handle_error_changed)
         self._player.positionChanged.connect(self._handle_position_changed)
+        self._player.mediaStatusChanged.connect(self._handle_media_status_changed)
 
     @Signal
     def playlist_changed(self):
@@ -66,8 +68,15 @@ class PlayerView(QObject):
         self._player_model.play(song)
         self._play_song(index)
 
+    @Slot()
+    def unpause(self):
+        self._player.play()
+        self._player_model.unpause()
+
+    @Slot()
     def pause(self):
-        print("Pausing song")
+        self._player.pause()
+        self._player_model.pause()
 
     def stop(self):
         print("Stopping song")
@@ -88,12 +97,17 @@ class PlayerView(QObject):
         if not file_extension:
             return
 
-        if file_extension[1:] in self.SUPPORTED_AUDIO_FORMATS:
-            metadata = eyed3.load(file_path)
+        file_extension = file_extension.lower()[1:]
+
+        if file_extension in self.SUPPORTED_AUDIO_FORMATS:
+            metadata = self._extract_metadata(file_path)
+
+            if not metadata:
+                return
 
             song = Song(
-                name=metadata.tag.title or file_path,
-                duration=metadata.info.time_secs,
+                name=metadata["title"],
+                duration=metadata["duration"],
                 path=file_path,
             )
 
@@ -113,6 +127,18 @@ class PlayerView(QObject):
 
     def _handle_error_changed(self):
         self._toast_model.show("Something went wrong")
-    
+
     def _handle_position_changed(self, position: int):
         self._player_model.position = position / 1000
+
+    def _extract_metadata(self, file_path: str):
+        tag = TinyTag.get(file_path)
+
+        return {
+            "title": tag.title or os.path.basename(file_path),
+            "duration": tag.duration
+        }
+    
+    def _handle_media_status_changed(self, media_status):
+        if media_status == QMediaPlayer.MediaStatus.EndOfMedia:
+            self._player_model.stop()

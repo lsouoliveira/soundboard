@@ -82,6 +82,15 @@ class PlayerModel(QObject):
         self.title = song.name
         self.duration = song.duration
         self.is_playing = True
+    
+    def pause(self):
+        self.is_playing = False
+    
+    def unpause(self):
+        self.is_playing = True
+    
+    def stop(self):
+        self.pause()
 
 
 class PlaylistModel(QAbstractListModel):
