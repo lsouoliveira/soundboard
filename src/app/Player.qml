@@ -34,6 +34,9 @@ Rectangle {
                 id: slider
                 Layout.fillWidth: true
                 padding: 0
+                from: 0
+                to: 1
+                value: PlayerView.player_model.position / PlayerView.player_model.duration
 
                 handle: Rectangle {
                     x: slider.leftPadding + slider.visualPosition * (slider.availableWidth - width)

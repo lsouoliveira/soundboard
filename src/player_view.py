@@ -32,6 +32,7 @@ class PlayerView(QObject):
         self._player.setAudioOutput(self._audio_output)
 
         self._player.errorChanged.connect(self._handle_error_changed)
+        self._player.positionChanged.connect(self._handle_position_changed)
 
     @Signal
     def playlist_changed(self):
@@ -112,3 +113,6 @@ class PlayerView(QObject):
 
     def _handle_error_changed(self):
         self._toast_model.show("Something went wrong")
+    
+    def _handle_position_changed(self, position: int):
+        self._player_model.position = position / 1000
