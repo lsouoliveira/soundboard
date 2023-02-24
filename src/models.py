@@ -20,6 +20,7 @@ class PlayerModel(QObject):
         self._position = 0
         self._duration = 0
         self._title = "No song selected"
+        self._volume = 1
 
     @Signal
     def position_changed(self):
@@ -41,12 +42,16 @@ class PlayerModel(QObject):
     def title_changed(self):
         pass
 
-    @Property(int, notify=position_changed)
+    @Signal
+    def volume_changed(self):
+        pass
+
+    @Property(float, notify=position_changed)
     def position(self):
         return self._position
 
     @position.setter
-    def position(self, value: int):
+    def position(self, value: float):
         self._position = value
         self.position_changed.emit()
 
@@ -77,18 +82,27 @@ class PlayerModel(QObject):
         self._title = value
         self.title_changed.emit()
 
-    def play(self, song):
+    @Property(float, notify=volume_changed)
+    def volume(self):
+        return self._volume
+
+    @volume.setter
+    def volume(self, value: float):
+        self._volume = value
+        self.volume_changed.emit()
+
+    def play(self, title, duration):
         self.position = 0
-        self.title = song.name
-        self.duration = song.duration
+        self.title = title 
+        self.duration = duration
         self.is_playing = True
-    
+
     def pause(self):
         self.is_playing = False
-    
+
     def unpause(self):
         self.is_playing = True
-    
+
     def stop(self):
         self.pause()
 

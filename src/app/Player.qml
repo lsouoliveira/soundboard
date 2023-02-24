@@ -30,40 +30,12 @@ Rectangle {
             Layout.leftMargin: 50
             Layout.rightMargin: 50
 
-            Slider {
+            CustomSlider {
                 id: slider
                 Layout.fillWidth: true
-                padding: 0
                 from: 0
                 to: 1
                 value: PlayerView.player_model.position / PlayerView.player_model.duration
-
-                handle: Rectangle {
-                    x: slider.leftPadding + slider.visualPosition * (slider.availableWidth - width)
-                    y: slider.topPadding + slider.availableHeight / 2 - height / 2
-                    width: 18
-                    height: 18
-                    radius: 9
-                    color: "white"
-                }
-
-                background: Rectangle {
-                    x: 0 
-                    y: slider.topPadding + slider.availableHeight / 2 - height / 2
-                    implicitWidth: 200
-                    implicitHeight: 4
-                    width: slider.availableWidth
-                    height: implicitHeight
-                    radius: 2
-                    color: "#424242"
-
-                    Rectangle {
-                        width: slider.visualPosition * parent.width
-                        height: parent.height
-                        color: "#71C6FF"
-                        radius: 2
-                    }
-                }
             }
 
             RowLayout {
@@ -91,11 +63,18 @@ Rectangle {
         }
 
         RowLayout {
+            Layout.fillWidth: true
             Layout.leftMargin: 50
             Layout.rightMargin: 50
             Layout.bottomMargin: 50
-            Layout.fillWidth: true
-            Layout.alignment: Qt.AlignHCenter
+
+            Item {
+                Layout.preferredWidth: 128
+            }
+
+            Item {
+                Layout.fillWidth: true
+            }
 
             Rectangle {
                 Layout.preferredWidth: 72
@@ -103,24 +82,27 @@ Rectangle {
                 color: "white"
                 radius: 36
 
-                Image {
-                    id: icon_default
-                    source: "images/play-arrow.png"
-                    width: 28
-                    height: 28
-                    visible: !PlayerView.player_model.is_playing
-                    x: parent.x + parent.width / 2 - (width * (1 / 3))
-                    y: parent.y + parent.height / 2 - (height / 2)
-                }
+                ColumnLayout {
+                    anchors.fill: parent
 
-                Image {
-                    id: icon_pressed
-                    source: "images/pause.png"
-                    width: 28
-                    height: 28
-                    visible: PlayerView.player_model.is_playing
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.horizontalCenter: parent.horizontalCenter
+                    Image {
+                        id: icon_default
+                        source: "images/play-arrow.png"
+                        Layout.preferredWidth: 28
+                        Layout.preferredHeight: 28
+                        visible: !PlayerView.player_model.is_playing
+                        Layout.leftMargin: parent.width / 2 - width * 1 / 3
+                        Layout.alignment: Qt.AlignVCenter
+                    }
+
+                    Image {
+                        id: icon_pressed
+                        source: "images/pause.png"
+                        Layout.preferredWidth: 28
+                        Layout.preferredHeight: 28
+                        visible: PlayerView.player_model.is_playing
+                        Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+                    }
                 }
 
                 transform: Scale {
@@ -150,6 +132,22 @@ Rectangle {
                     }
                 }
             }
+
+            Item {
+                Layout.fillWidth: true
+            }
+
+            CustomSlider {
+                Layout.preferredWidth: 128
+                from: 0
+                to: 1
+                value: 1
+
+                onValueChanged: {
+                    PlayerView.player_model.volume = value
+                }
+            }
         }
+
     }
 }

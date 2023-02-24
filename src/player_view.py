@@ -4,7 +4,7 @@ from tinytag import TinyTag
 import os
 
 from PySide6.QtCore import QObject, Slot, QUrl, Signal, Property
-from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
+from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput, QMediaMetaData
 
 from models import PlaylistModel, ToastModel, PlayerModel
 from data import Song
@@ -35,6 +35,7 @@ class PlayerView(QObject):
         self._player.errorChanged.connect(self._handle_error_changed)
         self._player.positionChanged.connect(self._handle_position_changed)
         self._player.mediaStatusChanged.connect(self._handle_media_status_changed)
+        self._player_model.volume_changed.connect(self._handle_volume_changed)
 
     @Signal
     def playlist_changed(self):
@@ -65,7 +66,7 @@ class PlayerView(QObject):
         song = self._playlist_model.song(index)
 
         self._playlist_model.mark_as_playing(index)
-        self._player_model.play(song)
+        self._player_model.play(song.name, song.duration)
         self._play_song(index)
 
     @Slot()
@@ -92,7 +93,9 @@ class PlayerView(QObject):
         file_path = file_path.replace("\\", "/")
 
         mime = magic.from_file(file_path, mime=True)
-        file_extension = mimetypes.guess_extension(mime) or os.path.splitext(file_path)[-1] 
+        file_extension = (
+            mimetypes.guess_extension(mime) or os.path.splitext(file_path)[-1]
+        )
 
         if not file_extension:
             return
@@ -122,7 +125,7 @@ class PlayerView(QObject):
         song_path = self._playlist_model.path(index)
 
         self._player.setSource(QUrl(song_path.replace("\\", "/")))
-        self._audio_output.setVolume(100)
+        self._audio_output.setVolume(self._player_model.volume)
         self._player.play()
 
     def _handle_error_changed(self):
@@ -136,9 +139,12 @@ class PlayerView(QObject):
 
         return {
             "title": tag.title or os.path.basename(file_path),
-            "duration": tag.duration
+            "duration": tag.duration,
         }
-    
+
     def _handle_media_status_changed(self, media_status):
         if media_status == QMediaPlayer.MediaStatus.EndOfMedia:
             self._player_model.stop()
+        
+    def _handle_volume_changed(self):
+        self._audio_output.setVolume(self._player_model.volume)
