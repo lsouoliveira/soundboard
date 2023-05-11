@@ -33,7 +33,7 @@ class PlayerView(QObject):
         self._player.setAudioOutput(self._audio_output)
 
         self._player.errorChanged.connect(self._handle_error_changed)
-        self._player.positionChanged.connect(self._handle_position_changed)
+        self._player.positionChanged.connect(self._handle_player_position_changed)
         self._player.mediaStatusChanged.connect(self._handle_media_status_changed)
         self._player_model.volume_changed.connect(self._handle_volume_changed)
 
@@ -63,6 +63,9 @@ class PlayerView(QObject):
 
     @Slot(int)
     def play(self, index: int):
+        if index >= self._playlist_model.rowCount():
+            return
+
         song = self._playlist_model.song(index)
 
         self._playlist_model.mark_as_playing(index)
@@ -70,23 +73,13 @@ class PlayerView(QObject):
         self._play_song(index)
 
     @Slot()
-    def unpause(self):
-        self._player.play()
-        self._player_model.unpause()
+    def toggle_playback(self):
+        if self._player_model.is_playing:
+            self._player.pause()
+        else:
+            self._player.play()
 
-    @Slot()
-    def pause(self):
-        self._player.pause()
-        self._player_model.pause()
-
-    def stop(self):
-        print("Stopping song")
-
-    def next(self):
-        print("Playing next song")
-
-    def previous(self):
-        print("Playing previous song")
+        self._player_model.toggle_playback()
 
     @Slot(str)
     def add_file(self, file_path: str):
@@ -110,11 +103,25 @@ class PlayerView(QObject):
 
             song = Song(
                 name=metadata["title"],
-                duration=metadata["duration"],
+                duration=float(metadata["duration"]) * 1000,
                 path=file_path,
             )
 
             self._playlist_model.add(song)
+
+    @Signal
+    def position_changed(self):
+        pass
+
+    @Property(float, notify=position_changed)
+    def position(self):
+        return self._player.position()
+
+    @position.setter
+    def position(self, value: float):
+        self._player.setPosition(int(value))
+
+        self.position_changed.emit()
 
     @Slot(list)
     def add_files(self, qurls):
@@ -131,8 +138,8 @@ class PlayerView(QObject):
     def _handle_error_changed(self):
         self._toast_model.show("Something went wrong")
 
-    def _handle_position_changed(self, position: int):
-        self._player_model.position = position / 1000
+    def _handle_player_position_changed(self, position: int):
+        self._player_model.position = position
 
     def _extract_metadata(self, file_path: str):
         tag = TinyTag.get(file_path)
@@ -145,6 +152,6 @@ class PlayerView(QObject):
     def _handle_media_status_changed(self, media_status):
         if media_status == QMediaPlayer.MediaStatus.EndOfMedia:
             self._player_model.stop()
-        
+
     def _handle_volume_changed(self):
         self._audio_output.setVolume(self._player_model.volume)

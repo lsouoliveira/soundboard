@@ -33,9 +33,13 @@ Rectangle {
             CustomSlider {
                 id: slider
                 Layout.fillWidth: true
-                from: 0
-                to: 1
-                value: PlayerView.player_model.position / PlayerView.player_model.duration
+                from: 0 
+                to: PlayerView.player_model.duration 
+                value: PlayerView.player_model.position
+
+                onMoved: {
+                    PlayerView.position = value
+                }
             }
 
             RowLayout {
@@ -87,12 +91,12 @@ Rectangle {
 
                     Image {
                         id: icon_default
-                        source: "images/play-arrow.png"
                         Layout.preferredWidth: 28
                         Layout.preferredHeight: 28
-                        visible: !PlayerView.player_model.is_playing
                         Layout.leftMargin: parent.width / 2 - width * 1 / 3
                         Layout.alignment: Qt.AlignVCenter
+                        source: "images/play-arrow.png"
+                        visible: !PlayerView.player_model.is_playing
                     }
 
                     Image {
@@ -100,8 +104,8 @@ Rectangle {
                         source: "images/pause.png"
                         Layout.preferredWidth: 28
                         Layout.preferredHeight: 28
-                        visible: PlayerView.player_model.is_playing
                         Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+                        visible: PlayerView.player_model.is_playing
                     }
                 }
 
@@ -114,11 +118,7 @@ Rectangle {
                     height: parent.height
                     hoverEnabled: true
                     onClicked: {
-                        if(PlayerView.player_model.is_playing) {
-                            PlayerView.pause()
-                        } else {
-                            PlayerView.unpause()
-                        }
+                        PlayerView.toggle_playback()
                     }
                     onPressed: {
                         scale.xScale = 0.9

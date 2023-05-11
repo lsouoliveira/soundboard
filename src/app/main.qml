@@ -7,7 +7,8 @@ ApplicationWindow {
     width: 700
     height: 640
     title: "Soundboard"
-    color: "#11111111"
+    color: "#00111111"
+    flags: Qt.Dialog | Qt.WindowTitleHint | Qt.WindowCloseButtonHint | Qt.WindowMinMaxButtonsHint | Qt.WindowSystemMenuHint
 
     DropArea {
         anchors.fill: parent
@@ -17,77 +18,103 @@ ApplicationWindow {
         }
     }
 
-    ColumnLayout {
-        anchors.fill: parent
-        spacing: 0
-
-        Player {
-            Layout.fillWidth: true
-        }
-
-        Playlist {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-        }
-
-    }
-
     Rectangle {
-        id: toast
-        width: parent.width - 100
-        height: 50 
-        y: parent.height - height - 25
-        x: parent.width / 2 - width / 2
-        radius: 10
-        color: "#e30909"
-        visible: false 
-        opacity: 0
+        anchors.fill: parent
+        focus: true
+        color: "transparent"
+
+        MouseArea {
+            anchors.fill: parent
+
+            onClicked: {
+                focus = true
+            }
+        }
+
+        Keys.onPressed: (event) => {
+            if(event.key >= Qt.Key_1 && event.key <= Qt.Key_1 + 8) {
+                PlayerView.play(event.key - Qt.Key_1)
+            }
+
+            if(event.key === Qt.Key_Space) {
+                PlayerView.toggle_playback()
+            }
+        }
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: 10 
             spacing: 0
 
-            Text {
-                id: toastText
-                color: "white"
-                font.pixelSize: 16
-                text: PlayerView.toast_model.message 
+            Player {
+                Layout.fillWidth: true
             }
+
+            Playlist {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+            }
+
         }
 
-        Connections {
-            target: PlayerView.toast_model
+        Rectangle {
+            id: toast
+            width: parent.width - 100
+            height: 50 
+            y: parent.height - height - 25
+            x: parent.width / 2 - width / 2
+            radius: 10
+            color: "#e30909"
+            visible: false 
+            opacity: 0
 
-            function onIsVisibleChanged() {
-                toast.visible = true
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: 10 
+                spacing: 0
 
-                if(!PlayerView.toast_model.is_visible) {
-                    toastAnimation.from = 1
-                    toastAnimation.to = 0
-                } else {
-                    toastAnimation.from = 0
-                    toastAnimation.to = 1
+                Text {
+                    id: toastText
+                    color: "white"
+                    font.pixelSize: 16
+                    text: PlayerView.toast_model.message 
                 }
-
-                toastAnimation.running = true
             }
-        }
 
-        OpacityAnimator {
-            id: toastAnimation
-            target: toast;
-            from: 0;
-            to: 1;
-            duration: 250
-            running: false
-            onFinished: {
-                toast.visible = PlayerView.toast_model.is_visible
+            Connections {
+                target: PlayerView.toast_model
+
+                function onIsVisibleChanged() {
+                    toast.visible = true
+
+                    if(!PlayerView.toast_model.is_visible) {
+                        toastAnimation.from = 1
+                        toastAnimation.to = 0
+                    } else {
+                        toastAnimation.from = 0
+                        toastAnimation.to = 1
+                    }
+
+                    toastAnimation.running = true
+                }
+            }
+
+            OpacityAnimator {
+                id: toastAnimation
+                target: toast;
+                from: 0;
+                to: 1;
+                duration: 250
+                running: false
+                onFinished: {
+                    toast.visible = PlayerView.toast_model.is_visible
+                }
             }
         }
     }
 
     function formatDuration(duration) {
+        duration = duration / 1000
+
         const hours = Math.floor(duration / 3600)
         const minutes = Math.floor(duration % 3600 / 60)
         const seconds = Math.floor(duration % 3600 % 60) 

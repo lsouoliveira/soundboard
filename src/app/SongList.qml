@@ -8,6 +8,7 @@ ListView {
     anchors.fill: parent
     model: songModel
     interactive: true
+    boundsBehavior: Flickable.StopAtBounds 
     clip: true
     delegate: ColumnLayout {
         width: list.width 
@@ -26,7 +27,7 @@ ListView {
 
                 Text {
                     id: songName
-                    text: model.name 
+                    text: (index + 1) + ". " + model.name
                     font.family: "Source Sans Pro"
                     font.pointSize: 16
                     font.weight: Font.Normal
